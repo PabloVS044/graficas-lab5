@@ -1,5 +1,6 @@
 use raylib::prelude::*;
 use crate::vertex::Vertex;
+use crate::fragment::Fragment;
 use crate::Uniforms;
 
 // This function manually multiplies a 4x4 matrix with a 4D vector (in homogeneous coordinates)
@@ -45,4 +46,9 @@ pub fn vertex_shader(vertex: &Vertex, uniforms: &Uniforms) -> Vertex {
     transformed_position,
     transformed_normal: vertex.normal, // Note: Correct normal transformation is more complex
   }
+}
+
+// Passthrough: devuelve el color que el fragmento ya trae.
+pub fn fragment_shader(fragment: &Fragment) -> Vector3 {
+  fragment.color
 }

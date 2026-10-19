@@ -6,49 +6,45 @@ mod line;
 mod vertex;
 mod fragment;
 mod shaders;
+mod primitive;
+mod rasterizer;
 
 use framebuffer::Framebuffer;
 use vertex::Vertex;
-use triangle::triangle;
-use shaders::vertex_shader;
+use shaders::{vertex_shader, fragment_shader};
+use primitive::primitive_assembly;
+use rasterizer::rasterize;
 use raylib::prelude::*;
 
 pub struct Uniforms {
     pub model_matrix: Matrix,
 }
 
-fn render(framebuffer: &mut Framebuffer, uniforms: &Uniforms, vertex_array: &[Vertex]) {
-    // Vertex Shader Stage
-    let mut transformed_vertices = Vec::with_capacity(vertex_array.len());
-    for vertex in vertex_array {
-        let transformed = vertex_shader(vertex, uniforms);
-        transformed_vertices.push(transformed);
-    }
+fn render(
+    framebuffer: &mut Framebuffer,
+    uniforms: &Uniforms,
+    vertex_array: &[Vertex],
+) {
+    // 1. Procesamiento de vértices
+    let transformed_vertices: Vec<Vertex> = vertex_array
+        .iter()
+        .map(|vertex| vertex_shader(vertex, uniforms))
+        .collect();
 
-    // Primitive Assembly Stage
-    let mut triangles = Vec::new();
-    for i in (0..transformed_vertices.len()).step_by(3) {
-        if i + 2 < transformed_vertices.len() {
-            triangles.push([
-                transformed_vertices[i].clone(),
-                transformed_vertices[i + 1].clone(),
-                transformed_vertices[i + 2].clone(),
-            ]);
-        }
-    }
+    // 2. Ensamblaje de primitivas
+    let triangles = primitive_assembly(&transformed_vertices);
 
-    // Rasterization Stage
-    let mut fragments = Vec::new();
-    for tri in &triangles {
-        fragments.extend(triangle(&tri[0], &tri[1], &tri[2]));
-    }
+    // 3. Rasterización
+    let fragments = rasterize(&triangles);
 
-    // Fragment Processing Stage
+    // 4. Procesamiento de fragmentos
     for fragment in fragments {
+        let color = fragment_shader(&fragment);
+
         framebuffer.point(
             fragment.position.x as i32,
             fragment.position.y as i32,
-            fragment.color
+            color,
         );
     }
 }
