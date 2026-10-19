@@ -1,8 +1,22 @@
 use crate::fragment::Fragment;
 use crate::vertex::Vertex;
 use crate::line::line;
+use crate::barycentric::triangle_barycentric;
 
-pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex) -> Vec<Fragment> {
+#[derive(Clone, Copy)]
+pub enum TriangleMode {
+    Wireframe,
+    FilledBarycentric,
+}
+
+pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, mode: TriangleMode) -> Vec<Fragment> {
+    match mode {
+        TriangleMode::Wireframe => triangle_wireframe(v1, v2, v3),
+        TriangleMode::FilledBarycentric => triangle_barycentric(v1, v2, v3),
+    }
+}
+
+pub fn triangle_wireframe(v1: &Vertex, v2: &Vertex, v3: &Vertex) -> Vec<Fragment> {
     let mut fragments = Vec::new();
 
     // Draw the three sides of the triangle

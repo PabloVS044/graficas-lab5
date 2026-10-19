@@ -8,9 +8,12 @@ mod fragment;
 mod shaders;
 mod primitive;
 mod rasterizer;
+mod barycentric;
+mod scene;
 
 use framebuffer::Framebuffer;
 use vertex::Vertex;
+use triangle::TriangleMode;
 use shaders::{vertex_shader, fragment_shader};
 use primitive::primitive_assembly;
 use rasterizer::rasterize;
@@ -20,11 +23,15 @@ pub struct Uniforms {
     pub model_matrix: Matrix,
 }
 
-fn render(
-    framebuffer: &mut Framebuffer,
-    uniforms: &Uniforms,
-    vertex_array: &[Vertex],
-) {
+pub fn identity_uniforms() -> Uniforms {
+    Uniforms {
+        model_matrix: Matrix::identity(),
+    }
+}
+
+/// Etapas 1 y 2 del pipeline. Se separan de `render` para que la comparación
+/// y la medición rastericen los mismos triángulos que se dibujan.
+pub fn assemble_triangles(uniforms: &Uniforms, vertex_array: &[Vertex]) -> Vec<[Vertex; 3]> {
     // 1. Procesamiento de vértices
     let transformed_vertices: Vec<Vertex> = vertex_array
         .iter()
@@ -32,10 +39,21 @@ fn render(
         .collect();
 
     // 2. Ensamblaje de primitivas
-    let triangles = primitive_assembly(&transformed_vertices);
+    primitive_assembly(&transformed_vertices)
+}
+
+fn render(
+    framebuffer: &mut Framebuffer,
+    uniforms: &Uniforms,
+    vertex_array: &[Vertex],
+    mode: TriangleMode,
+) {
+    // 1. Procesamiento de vértices
+    // 2. Ensamblaje de primitivas
+    let triangles = assemble_triangles(uniforms, vertex_array);
 
     // 3. Rasterización
-    let fragments = rasterize(&triangles);
+    let fragments = rasterize(&triangles, mode);
 
     // 4. Procesamiento de fragmentos
     for fragment in fragments {
@@ -52,7 +70,7 @@ fn render(
 fn main() {
     let (mut window, thread) = raylib::init()
         .size(800, 600)
-        .title("Primer triangulo")
+        .title("Filling triangles")
         .build();
 
     window.set_target_fps(60);
@@ -61,33 +79,20 @@ fn main() {
     framebuffer.set_background_color(Vector3::new(0.0, 0.0, 0.0));
     framebuffer.init_texture(&mut window, &thread);
 
-    let positions = [
-        Vector3::new(300.0, 200.0, 0.0),
-        Vector3::new(400.0, 400.0, 0.0),
-        Vector3::new(500.0, 200.0, 0.0),
-    ];
-
-    let vertex_array: Vec<Vertex> = positions
-        .into_iter()
-        .map(|position| {
-            let mut vertex = Vertex::new_with_color(
-                position,
-                Vector3::new(1.0, 1.0, 1.0),
-            );
-
-            // Las posiciones ya están en coordenadas de pantalla.
-            vertex.transformed_position = position;
-            vertex
-        })
-        .collect();
-
-    let uniforms = Uniforms {
-        model_matrix: Matrix::identity(),
-    };
+    let vertex_array = scene::test_scene();
+    let uniforms = identity_uniforms();
+    let mut mode = TriangleMode::Wireframe;
 
     while !window.window_should_close() {
+        if window.is_key_pressed(KeyboardKey::KEY_ONE) {
+            mode = TriangleMode::Wireframe;
+        }
+        if window.is_key_pressed(KeyboardKey::KEY_TWO) {
+            mode = TriangleMode::FilledBarycentric;
+        }
+
         framebuffer.clear();
-        render(&mut framebuffer, &uniforms, &vertex_array);
+        render(&mut framebuffer, &uniforms, &vertex_array, mode);
         framebuffer.swap_buffers(&mut window, &thread);
     }
 }
