@@ -4,10 +4,10 @@
 //! centro de cada píxel, `(x + 0.5, y + 0.5)`. Un centro es parte del triángulo
 //! si sus tres coordenadas baricéntricas lo ponen dentro.
 //!
-//! Regla de bordes: un centro que cae exactamente sobre una arista solo se
-//! acepta si esa arista es **superior o izquierda** ("top-left rule"). Así dos
-//! triángulos que comparten una arista no generan el mismo fragmento dos veces
-//! ni dejan un hueco entre ellos.
+//! Regla de bordes (la misma que sigue `scanline.rs`): un centro que cae
+//! exactamente sobre una arista solo se acepta si esa arista es **superior o
+//! izquierda** ("top-left rule"). Así dos triángulos que comparten una arista
+//! no generan el mismo fragmento dos veces ni dejan un hueco entre ellos.
 
 use raylib::math::Vector3;
 

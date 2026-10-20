@@ -9,6 +9,7 @@ mod shaders;
 mod primitive;
 mod rasterizer;
 mod barycentric;
+mod scanline;
 mod scene;
 
 use framebuffer::Framebuffer;
@@ -89,6 +90,9 @@ fn main() {
         }
         if window.is_key_pressed(KeyboardKey::KEY_TWO) {
             mode = TriangleMode::FilledBarycentric;
+        }
+        if window.is_key_pressed(KeyboardKey::KEY_THREE) {
+            mode = TriangleMode::FilledScanline;
         }
 
         framebuffer.clear();
