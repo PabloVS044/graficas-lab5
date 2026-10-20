@@ -11,6 +11,7 @@ mod rasterizer;
 mod barycentric;
 mod scanline;
 mod scene;
+mod compare;
 
 use framebuffer::Framebuffer;
 use vertex::Vertex;
@@ -69,6 +70,14 @@ fn render(
 }
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let has_flag = |flag: &str| args.iter().any(|arg| arg == flag);
+
+    if has_flag("--compare-triangles") {
+        compare::run();
+        return;
+    }
+
     let (mut window, thread) = raylib::init()
         .size(800, 600)
         .title("Filling triangles")
