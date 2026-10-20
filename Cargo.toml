@@ -14,3 +14,7 @@ raylib = { version = "6.0.0", features = [
 opt-level = 3
 debug = false
 
+# Simbolos de depuracion en release para que el flamegraph muestre nombres
+# de funciones; no cambian el codigo que se genera.
+[profile.release]
+debug = true

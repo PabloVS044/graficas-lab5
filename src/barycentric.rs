@@ -39,6 +39,8 @@ fn inside(weight: f32, top_left: bool) -> bool {
     weight > 0.0 || (weight == 0.0 && top_left)
 }
 
+// Sin inline para que aparezca con su nombre en el flamegraph.
+#[inline(never)]
 pub fn triangle_barycentric(v1: &Vertex, v2: &Vertex, v3: &Vertex) -> Vec<Fragment> {
     let a = v1.transformed_position;
     let mut b = v2.transformed_position;

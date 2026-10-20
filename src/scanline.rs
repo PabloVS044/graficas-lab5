@@ -18,6 +18,8 @@ use crate::barycentric::edge_function;
 use crate::fragment::Fragment;
 use crate::vertex::Vertex;
 
+// Sin inline para que aparezca con su nombre en el flamegraph.
+#[inline(never)]
 pub fn triangle_scanline(v1: &Vertex, v2: &Vertex, v3: &Vertex) -> Vec<Fragment> {
     let a = v1.transformed_position;
     let mut b = v2.transformed_position;
