@@ -46,6 +46,11 @@ impl Framebuffer {
         }
     }
 
+    /// Guarda la imagen como PNG sin necesidad de abrir una ventana.
+    pub fn export(&self, path: &str) {
+        self.image.export_image(path);
+    }
+
     pub fn set_background_color(&mut self, color: Vector3) {
         self.background_color = color;
     }

@@ -12,6 +12,12 @@ pub enum TriangleMode {
 }
 
 impl TriangleMode {
+    pub const ALL: [TriangleMode; 3] = [
+        TriangleMode::Wireframe,
+        TriangleMode::FilledBarycentric,
+        TriangleMode::FilledScanline,
+    ];
+
     pub fn name(self) -> &'static str {
         match self {
             TriangleMode::Wireframe => "wireframe",

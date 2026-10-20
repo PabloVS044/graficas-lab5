@@ -82,6 +82,10 @@ fn main() {
         compare::run();
         return;
     }
+    if has_flag("--export-images") {
+        export_images();
+        return;
+    }
 
     let (mut window, thread) = raylib::init()
         .size(800, 600)
@@ -112,5 +116,22 @@ fn main() {
         framebuffer.clear();
         render(&mut framebuffer, &uniforms, &vertex_array, mode);
         framebuffer.swap_buffers(&mut window, &thread);
+    }
+}
+
+/// Guarda una imagen de cada modo en `docs/`, sin abrir la ventana.
+fn export_images() {
+    std::fs::create_dir_all("docs").expect("No se pudo crear docs/");
+
+    let vertex_array = scene::test_scene();
+    let uniforms = identity_uniforms();
+
+    for mode in TriangleMode::ALL {
+        let mut framebuffer = Framebuffer::new(800, 600);
+        framebuffer.set_background_color(Vector3::new(0.0, 0.0, 0.0));
+        framebuffer.clear();
+
+        render(&mut framebuffer, &uniforms, &vertex_array, mode);
+        framebuffer.export(&format!("docs/{}.png", mode.name()));
     }
 }
