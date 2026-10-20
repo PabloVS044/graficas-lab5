@@ -11,6 +11,7 @@ mod rasterizer;
 mod barycentric;
 mod scanline;
 mod scene;
+mod benchmark;
 mod compare;
 
 use framebuffer::Framebuffer;
@@ -73,6 +74,10 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let has_flag = |flag: &str| args.iter().any(|arg| arg == flag);
 
+    if has_flag("--benchmark-triangles") {
+        benchmark::run();
+        return;
+    }
     if has_flag("--compare-triangles") {
         compare::run();
         return;

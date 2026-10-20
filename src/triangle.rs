@@ -11,6 +11,16 @@ pub enum TriangleMode {
     FilledScanline,
 }
 
+impl TriangleMode {
+    pub fn name(self) -> &'static str {
+        match self {
+            TriangleMode::Wireframe => "wireframe",
+            TriangleMode::FilledBarycentric => "barycentric",
+            TriangleMode::FilledScanline => "scanline",
+        }
+    }
+}
+
 pub fn triangle(v1: &Vertex, v2: &Vertex, v3: &Vertex, mode: TriangleMode) -> Vec<Fragment> {
     match mode {
         TriangleMode::Wireframe => triangle_wireframe(v1, v2, v3),
