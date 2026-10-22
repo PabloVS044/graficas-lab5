@@ -81,26 +81,21 @@ que aparezcan con su nombre en el flamegraph. Reparto de las muestras:
 
 ## Diferencias encontradas
 
-**Posiciones.** Los dos algoritmos generan exactamente las mismas posiciones en
-todos los casos porque evalúan los mismos centros de píxel, `(x + 0.5, y + 0.5)`,
-con la misma regla para los centros que caen justo sobre una arista: entran si
-la arista es superior o izquierda y quedan fuera si es inferior o derecha.
+Los dos rellenos pintan exactamente los mismos pixeles. Los dos chequean cuál
+es el centro de cada pixel y usan la misma regla para los pixeles que aparecen
+justo sobre un borde, así no se pinta dos veces y tampoco quedan espacios vacíos.
 
-- **Baricéntrico:** un centro está dentro si sus tres coordenadas baricéntricas
-  son positivas. Si una vale cero, solo entra cuando esa arista es superior
-  (horizontal, con el interior debajo) o izquierda.
-- **Scanline:** cada arista cubre las filas con `y_min <= y + 0.5 < y_max` y en
-  cada fila entran los centros con `x_izq <= x + 0.5 < x_der`. Las aristas
-  horizontales se ignoran: la fila de una arista horizontal superior entra y la
-  de una inferior no. Un vértice que cae justo en una fila lo cuenta solo la
-  arista que empieza ahí.
+El baricéntrico, a diferencia del scanline, revisa todos los pixeles del
+rectángulo que encierra al triángulo y para cada uno calcula si se encuentra
+adentro. Muchos de estos pixeles quedan afuera, entonces hace cálculos extras.
+Por otra parte, el scanline recorre cada una de las filas, calcula dónde entra
+y dónde sale el triángulo en cada fila y sólo pinta lo que está en medio.
 
-Si el área es cero ("colineales"), ninguno de los dos genera fragmentos. Con el
-orden inverso, ambos intercambian dos vértices para dejar el área positiva.
+Por estas razones el scanline fue unas tres veces más rápido que el
+baricéntrico en las mediciones. En el flamegraph podemos ver que el baricéntrico
+gasta mucho más tiempo en los cálculos, mientras que el scanline usa la mayor
+parte de su tiempo en la creación de fragmentos.
 
-**Rendimiento.** El baricéntrico prueba cada píxel del rectángulo envolvente
-con tres funciones de arista, aunque muchos queden fuera del triángulo. Por
-eso la mayor parte de su tiempo se va en cálculos geométricos. El scanline
-calcula dos cortes por fila y solo visita los píxeles del interior: casi todo
-su tiempo es crear fragmentos. En ambos, copiar el `Vec` de cada triángulo al
-de `rasterize` pesa más que el crecimiento del `Vec`.
+Si los tres puntos se encuentran en una línea, no se pinta nada porque el
+triángulo no tiene área. Si los vértices vienen en orden inverso, los dos
+algoritmos los reordenan y pintan lo mismo.
